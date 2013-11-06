@@ -42,8 +42,31 @@ http://www.chromium.org/developers/design-documents/multi-process-architecture
 
 ## 共享渲染进程
 
+通常每个新的窗口或tab会开启一个新进程. 浏览器会创建新进程并指导它创建单独的`RenderView`. 
 
+有时候会有必要在tab和窗口之间共享渲染进程. web应用会打开一个新窗口并且和它同步通信, 例如在javascript中使用`window.open`. 这种情况下打开一个新窗口或tab需要重用已经打开的窗口的进程. 进程数目太多的时候, 或者用户已经有一个进程打开那个域名的时候, 我们也会使用策略把新tab分配给已经存在的进程. 这些策略在这里Process Models<http://www.chromium.org/developers/design-documents/process-models>. 
 
+## 检测崩溃或者出错的渲染器
+
+每个浏览器进程的IPC连接都会监视进程句柄. 如果这些句柄是signaled, 渲染器进程崩溃了, 那么tabs就会知道. 现在我们显示"sad tab"来告诉用户渲染器崩溃了. 页面可以通过Reload键或者再跳转一次来重新加载. 这时会发现没有进程, 然后创建一个. 
+
+## 渲染器的沙盒
+
+(Sandboxing<http://baike.baidu.com/view/514384.htm>)
+
+既然Webkit是在独立进程中运行的我们就有机会限制它对系统资源的访问. 例如我们可以保证渲染器只通过它的父浏览器访问网络. 雷斯蒂, 我们可以使用host操作系统的内置权限限制它对文件系统的访问. 
+
+除了限制渲染器对文件系统和网络的访问, 我们还可以限制它对用户输出和相关对象的访问. 每个渲染进程运行在独立的, 用户看不见的Windows "Desktop"中. 这就避免了渲染器对打开新窗口或者捕捉键盘消息的妥协(不懂). 
+
+## Giving back memory (恢复记忆?)
+
+因为渲染器在单独进程中运行, 直接结果就是降低隐藏的tab的优先级. 通常Windows上最小化的进程会自动把内存放在"available memory"的内存池中. 内存不足的情况下, Windows会先把这块内存swap到硬盘上来保证用户可见进程的响应. 我们对隐藏tab采用相同的原则. 渲染进程没有top-level tab的时候, 我们可以提示系统, 如有必要这个进程可以先释放"working set"那么多的内存swap到硬盘上. (we can release that process's "working set" size as a hint to the system to swap that memory out to disk first if necessary.) 因为发现减少working set size会影响用户跳转tab的性能, 我们要一点点释放这块内存. 这意味着如果用户跳转回一个最近使用的Tab, 这个tab的内存会比更早使用的tab的内存更有可能在内存中(being paged, not on disk). 内存足够运行所有程序的用户不会注意到这个进程: Windows只会在需要的时候才真正取回数据, 所以有足够内存的话不会有性能问题. (Windows will only actually reclaim such data if it needs it, so there is no performance hit when there is ample memory.)
+
+在低内存的情况下这帮助我们更好地优化内存足迹. 较少使用的后台页面的内存全都被swap(到硬盘上)了, 前台页面的数据全在内存中. 相比之下, 单进程的浏览器上所有页面的数据随机分布在内存中, 无法清除第分离使用的不使用的数据, 既浪费内存性能也不好. 
+
+## plug-ins
+
+Firefox风格的NPAPI plug-in在各自的进程中运行, 和渲染器分开. 详见Plugin-Architecute<http://www.chromium.org/developers/design-documents/plugin-architecture>
 
 ![alt text](link "title")
 title
