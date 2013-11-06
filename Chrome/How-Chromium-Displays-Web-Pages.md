@@ -81,6 +81,50 @@ UI线程的`RenderProcessHost`负责分配每个view的信息到合适的`Render
 
 其他的跳转和启动的例子在[Getting Around the Chromium Source Code](http://www.chromium.org/developers/how-tos/getting-around-the-chrome-source-code)中. 
 
+### "set cursor"消息的生命周期
+
+设置鼠标是从渲染器发送到浏览器的典型消息的一个例子. 在渲染器中, 发生了这些事情. 
+
+* Set cursor消息由WebKit内部生成, 通常是用来相应输入事件. Set cursor消息始于`RenderWidget::SetCursor in content/renderer/render_widget.cc`. 
+
+* (Set Cursor消息)会调用`RenderWidget::Send`来分配消息. `RenderView`也用这个方法来向浏览器发送消息, 它会调用`RenderThread::Send`. 
+
+* 会调到`IPC::SyncChannel`, 函数内部会代理发送这个消息到渲染器的主线程, 放在浏览器命名通道的后面. 
+
+然后浏览器会接管过来: 
+
+* `RenderProcessHost`中的`IPC::ChannelProxy`会接收到所有浏览器I/O线程的消息. 它会先把消息发送到`ResourceMessageFilter`分派网络请求和I/O线程的直接相关消息. 因为Set Cursor这个消息不会被过滤掉, 它会继续发送到浏览器的UI线程(`IPC;ChannelProxy`会在内部处理). 
+
+*  在`content/browser/renderer_host/render_process_host_impl.cc`中`RenderProcessHost::OnMessageReceived`拿到相应渲染进程的所有view的消息. 它会直接处理几种类型的消息, 剩下的分发到和发送消息的`RenderView`相应的`RenderViewHost`上. 
+
+* `RenderViewHost`没有处理的消息都会发送到`RenderWidgetHost`中处理, 包括Set cursor消息. 
+
+* `content/browser/renderer_host/render_view_host_impl.cc`中的消息表最终在`RenderWidgetHost::OnMsgSetCursor`中收到消息, 调用相应的UI函数来设置鼠标. 
+
+### "mouse click"消息的周期
+
+发送鼠标点击是从浏览器发送到渲染器的典型消息. 
+
+* 浏览器的UI线程通过`RenderWidgetHostViewWin::OnMouseEvent`收到Windows消息, 然后调用同一个类里的`ForwardMouseEventToRenderer `. 
+
+* 发送函数将输入事件打包成一个跨平台的`WebMouseEvent`最后发送到相关的`RenderWidgetHost`. 
+
+* `RenderWidgetHost::ForwardInputEvent`创建一个IPC消息`ViewMsg_HandleInputEvent`, 转播`WebInputEvent`给它, 然后调用`RenderWidgetHost::Send`. 
+
+* 这样做只是转播`RenderProcessHost::Send`函数, `RenderProcessHost::Send`会按顺序发送消息到`IPC::ChannelProxy`. 
+
+* 在内部`IPC::ChannelProxy`把消息代理发送到浏览器的I/O线程, 并且写到对应渲染器的命名管道中. 
+
+注意`WebContents`会创建许多其他类型的消息, 特别是跳转一类的. 这些消息通过类似的途径从`WebContents`传递到`RenderViewHost`. 
+
+渲染器接管: 
+
+* 渲染器主线程中的`IPC::Chanel`读取浏览器发送的消息, `IPC::ChannelProxy`把消息委托到渲染器线程. 
+
+* `RenderView::OnMessageReceived`拿到消息. 很多种消息在此直接处理. click消息不是, 它会(和其他未被处理的消息一起)发送到`RenderWidget::OnMessageReceived`, 后者按顺序发送到`RenderWidget::OnHandelInputEvent`. 
+
+* 输入事件被发送到`WebWidgetImpl::HandleInputEvent`, `WebWidgetImpl::HandleInputEvent`把它转换成一个WebKit`PlatformMouseEvent`类型然后发送给WebKit离得`WebCore::Widget`类. 
+
 [name](link "")
 
 ![alt text](link "title")
