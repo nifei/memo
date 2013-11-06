@@ -13,11 +13,11 @@ http://www.chromium.org/developers/design-documents/displaying-a-web-page-in-chr
 
 * **Webkit:** 在Safari, Chromium和其他基于Webkit的浏览器中使用的渲染引擎. **Port**是Webkit的一部分, 它整合平台相关的系统服务, 像资源加载或者图片什么的. 
 
-* **Glue:** Webkit类型到Chromium类型的转换. 这是"Webkit嵌入层". 这是Chromium和test_shell(测试Webkit用的)这两个浏览器的基础. 
+* **Glue:** Webkit类型到Chromium类型的转换. 这是"Webkit嵌套层". 这是Chromium和test_shell(测试Webkit用的)这两个浏览器的基础. 
 
 * **Renderer/Render Host:** Chromium的"多进程嵌入层". 它在进程边检之间代理通知和指令. 
 
-* **WebContents:** 内容模块的可重用组件, 主类. 可嵌入, 允许Html到view的多进程渲染. 详见[Content module pages](http://www.chromium.org/developers/content-module). 
+* **WebContents:** 内容模块的可重用组件, 主类. 可嵌套, 允许Html到view的多进程渲染. 详见[Content module pages](http://www.chromium.org/developers/content-module). 
 
 * **Brwoser:** 浏览器窗口, 包括多个WebContentses. 
 
@@ -25,7 +25,7 @@ http://www.chromium.org/developers/design-documents/displaying-a-web-page-in-chr
 
 ## Webkit
 
-我们用[Webkit](http://webkit.org/)开源工程来排版网页. 代码从Apple拉过来放在路径`/third_party/WebKit`下. Webkit主要是由代表核心排版功能的"WebCore"和运行JavaScript的"JavaScriptCore"组成. 我们只用JavaScriptCore来跑测试, 通常使用性能更好的V8 JavaScrip引擎来代替它. 我们实际上并不使用苹果成为"WebKit"的那一层, 那个是WebCore和诸如Safari的OS X应用的嵌入式API. 为了方便我们一般把苹果的代码称作"WebKit". 
+我们用[Webkit](http://webkit.org/)开源工程来排版网页. 代码从Apple拉过来放在路径`/third_party/WebKit`下. Webkit主要是由代表核心排版功能的"WebCore"和运行JavaScript的"JavaScriptCore"组成. 我们只用JavaScriptCore来跑测试, 通常使用性能更好的V8 JavaScrip引擎来代替它. 我们实际上并不使用苹果称为"WebKit"的那一层, 那个是WebCore和诸如Safari的OS X应用的嵌入式API. 为了方便我们一般把苹果的代码称作"WebKit". 
 
 ### The WebKit port
 
@@ -39,11 +39,11 @@ http://www.chromium.org/developers/design-documents/displaying-a-web-page-in-chr
 
 Chromium应用使用和第三方WebKit代码不同的类型, 编码风格和代码排版. WebKit "glue" 使用Google代码风格和类型提供了更方便的嵌入API(例子, 用`std::string`代替`WebCore::string`, `GURL`代替`KURL`). 黏合代码(glue code)置于`/webkit/glue`. 黏合对象和WebKit对象命名通常类似, 以"Web"打头. 例如`WebCore::Frame`变成`WebFrame`. 
 
-WebKit"黏合"层把Chromium代码基础的其他部分和WebCore的数据类型隔离开来, 将WebCore变化对Chromium代码基础(基线?)的影响降到最小. Chromium从不直接使用WebCore的数据类型. 加到WebKit的API在需要调用某个WebCore对象的时候为了Chromium黏合. 
+WebKit"黏合"层把Chromium代码基础的其他部分和WebCore的数据类型隔离开来, 将WebCore的变化对Chromium代码基础(基线?)的影响降到最小. Chromium从不直接使用WebCore的数据类型. 加到WebKit的API在需要调用某个WebCore对象的时候为了Chromium黏合. 
 
 "test shell"应用是个用于测试WebKit端口和黏合代码的极简的浏览器. 它像chromium一样使用相同的glue接口和WebKit通信. 开发者不必使用复杂的浏览器特性, 线程和进程就可以测试新代码. 这个应用也用来跑WebKit的自动化测试. 但是"test shell"不像Chromium一样以多进程的方式使用WebKit. 内容模块被放置在一个叫做"content shell"的应用中立即跑测试. 
 
-### 渲染程序
+## 渲染进程
 
 ![alt text](http://www.chromium.org/_/rsrc/1342584100941/developers/design-documents/displaying-a-web-page-in-chrome/Renderingintherenderer-v2.png "")
 
@@ -65,7 +65,7 @@ Chromium的渲染进程使用黏合接口嵌入在WebKit端口中. 代码不多:
 
 所有和渲染器进程之间的[IPC](http://www.chromium.org/developers/design-documents/inter-process-communication "")通信都是在浏览器的I/O线程中完成的. 这个线程还处理避免介入UI的[network communication](http://www.chromium.org/developers/design-documents/multi-process-resource-loading ""). 
 
-`RenderProcessHost`在主线程(UI线程)中初始化的时候会新的渲染器进程和带有通到渲染器的命名的管道`ChannelProxy`IPC对象. 这个对象(ChannelProxy)在浏览器的I/O线程中裕兴, 监听渲染器的通道, 自动把所有消息发送回UI线程的`RenderprocessHost`. 这个通道(ChannelProxy)上会安装一个`ResourceMessageFilter`, 滤掉能在I/O线程中直接处理的常规信息像网络请求什么的. 过滤的实现在`ResourceMessageFilter::OnMessageReceived`. 
+`RenderProcessHost`在主线程(UI线程)中初始化的时候会创建新的渲染器进程和带有通到渲染器的命名的管道`ChannelProxy`IPC对象. 这个对象(ChannelProxy)在浏览器的I/O线程中运行, 监听渲染器的通道, 自动把所有消息发送回UI线程的`RenderprocessHost`. 这个通道(ChannelProxy)上会安装一个`ResourceMessageFilter`, 滤掉能在I/O线程中直接处理的常规信息像网络请求什么的. 过滤的实现在`ResourceMessageFilter::OnMessageReceived`. 
 
 UI线程的`RenderProcessHost`负责分配每个view的信息到合适的`RenderViewHost`(介个会自己处理一些和view没有关系的信息)去. 消息分配实现在`RenderProcessHost::OnMessageReceived`. 
 
@@ -73,7 +73,7 @@ UI线程的`RenderProcessHost`负责分配每个view的信息到合适的`Render
 
 具体的view的消息会被传到`RenderViewHost::OnMessageReceived`. 多数消息在此处理, 其他的在基类`RenderWidgetHOST`中处理. 这两个对应渲染器中的`RenderView`和`RenderWidget`(见上面的"The Render Process"). 每个平台有一个view的类(`RenderWidgetHostView[Aura|Gtk|Mac|Win]`)来实现原生的view系统的整合. 
 
-在`RenderView/Widget`上层是`WebContents`对象, 多数消息最终由整个对象的一个函数调用来处理. `WebContents`表现网页内容. 是内容模块的顶层对象, 负责在一个矩形视图中显示网页. 详见[content module](http://www.chromium.org/developers/content-module ""). 
+在`RenderView/Widget`上层是`WebContents`对象, 多数消息最终由这个对象的一个函数调用来处理. `WebContents`表现网页内容. 是内容模块的顶层对象, 负责在一个矩形视图中显示网页. 详见[content module](http://www.chromium.org/developers/content-module ""). 
 
 `WebContents`对象包含在`TabContentsWrapper`中. 在`chrome/`下面, 负责一个tab. 
 
@@ -113,7 +113,7 @@ UI线程的`RenderProcessHost`负责分配每个view的信息到合适的`Render
 
 * 这样做只是转播`RenderProcessHost::Send`函数, `RenderProcessHost::Send`会按顺序发送消息到`IPC::ChannelProxy`. 
 
-* 在内部`IPC::ChannelProxy`把消息代理发送到浏览器的I/O线程, 并且写到对应渲染器的命名管道中. 
+* 在内部`IPC::ChannelProxy`把消息托管发送到浏览器的I/O线程, 并且写到对应渲染器的命名管道中. 
 
 注意`WebContents`会创建许多其他类型的消息, 特别是跳转一类的. 这些消息通过类似的途径从`WebContents`传递到`RenderViewHost`. 
 
