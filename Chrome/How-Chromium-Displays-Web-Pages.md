@@ -63,10 +63,25 @@ Chromium的渲染进程使用黏合接口嵌入在WebKit端口中. 代码不多:
 
 ### 底层浏览器进程对象
 
-所有和渲染器进程之间的IPC<http://www.chromium.org/developers/design-documents/inter-process-communication>通信都是在浏览器的I/O线程中完成的. 这个线程还处理避免介入UI的network communication<http://www.chromium.org/developers/design-documents/multi-process-resource-loading>. 
+所有和渲染器进程之间的[IPC](http://www.chromium.org/developers/design-documents/inter-process-communication "")通信都是在浏览器的I/O线程中完成的. 这个线程还处理避免介入UI的[network communication](http://www.chromium.org/developers/design-documents/multi-process-resource-loading ""). 
 
-This is [an example](http://example.com/ "Title") inline link.
+`RenderProcessHost`在主线程(UI线程)中初始化的时候会新的渲染器进程和带有通到渲染器的命名的管道`ChannelProxy`IPC对象. 这个对象(ChannelProxy)在浏览器的I/O线程中裕兴, 监听渲染器的通道, 自动把所有消息发送回UI线程的`RenderprocessHost`. 这个通道(ChannelProxy)上会安装一个`ResourceMessageFilter`, 滤掉能在I/O线程中直接处理的常规信息像网络请求什么的. 过滤的实现在`ResourceMessageFilter::OnMessageReceived`. 
 
+UI线程的`RenderProcessHost`负责分配每个view的信息到合适的`RenderViewHost`(介个会自己处理一些和view没有关系的信息)去. 消息分配实现在`RenderProcessHost::OnMessageReceived`. 
+
+### 上层浏览器进程对象
+
+具体的view的消息会被传到`RenderViewHost::OnMessageReceived`. 多数消息在此处理, 其他的在基类`RenderWidgetHOST`中处理. 这两个对应渲染器中的`RenderView`和`RenderWidget`(见上面的"The Render Process"). 每个平台有一个view的类(`RenderWidgetHostView[Aura|Gtk|Mac|Win]`)来实现原生的view系统的整合. 
+
+在`RenderView/Widget`上层是`WebContents`对象, 多数消息最终由整个对象的一个函数调用来处理. `WebContents`表现网页内容. 是内容模块的顶层对象, 负责在一个矩形视图中显示网页. 详见[content module](http://www.chromium.org/developers/content-module ""). 
+
+`WebContents`对象包含在`TabContentsWrapper`中. 在`chrome/`下面, 负责一个tab. 
+
+## 说明用例子
+
+其他的跳转和启动的例子在[Getting Around the Chromium Source Code](http://www.chromium.org/developers/how-tos/getting-around-the-chrome-source-code)中. 
+
+[name](link "")
 
 ![alt text](link "title")
 title
