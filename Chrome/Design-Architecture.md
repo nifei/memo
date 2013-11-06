@@ -17,4 +17,10 @@ http://www.chromium.org/developers/design-documents/multi-process-architecture
 
 运行UI和惯例页面和plugin的主进程叫做"浏览器进程"或者"浏览器"(browser process & browser). 页面的进程叫做"渲染进程"或者"渲染器"(render process & rnderer). 渲染器使用Webkit<http://webkit.org/>开源布局引擎阿狸渲染和布局HTML. 
 
-http://www.chromium.org/_/rsrc/1220197832277/developers/design-documents/multi-process-architecture/arch.png
+![alt text](http://www.chromium.org/_/rsrc/1220197832277/developers/design-documents/multi-process-architecture/arch.png "到底是进程啊还是线程啊还有为什么有的Render有一个view有的有两个啊")
+架构图
+
+
+
+![alt text](link "title")
+title
