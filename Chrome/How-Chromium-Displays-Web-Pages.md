@@ -2,7 +2,7 @@
 
 http://www.chromium.org/developers/design-documents/displaying-a-web-page-in-chrome
 
-文档从下向上讲述了Chromium怎样显示网页. 确保你看过multi-process architecture<http://www.chromium.org/developers/design-documents/multi-process-architecture>设计文档了. 理解主要组件的阻塞流程很重要. multi-process resource loading<http://www.chromium.org/developers/design-documents/multi-process-resource-loading> 这一篇讲怎样从互联网上获取页面可能也有帮助. 
+文档从下向上讲述了Chromium怎样显示网页. 确保你看过[multi-process architecture](http://www.chromium.org/developers/design-documents/multi-process-architecture)设计文档了. 理解主要组件的阻塞流程很重要. [multi-process resource loading](http://www.chromium.org/developers/design-documents/multi-process-resource-loading)这一篇讲怎样从互联网上获取页面可能也有帮助. 
 
 ## 概念上的应用层
 
@@ -17,7 +17,7 @@ http://www.chromium.org/developers/design-documents/displaying-a-web-page-in-chr
 
 * **Renderer/Render Host:** Chromium的"多进程嵌入层". 它在进程边检之间代理通知和指令. 
 
-* **WebContents:** 内容模块的可重用组件, 主类. 可嵌入, 允许Html到view的多进程渲染. 详见Content module pages<http://www.chromium.org/developers/content-module>. 
+* **WebContents:** 内容模块的可重用组件, 主类. 可嵌入, 允许Html到view的多进程渲染. 详见[Content module pages](http://www.chromium.org/developers/content-module). 
 
 * **Brwoser:** 浏览器窗口, 包括多个WebContentses. 
 
@@ -25,13 +25,13 @@ http://www.chromium.org/developers/design-documents/displaying-a-web-page-in-chr
 
 ## Webkit
 
-我们用Webkit<http://webkit.org/>开源工程来排版网页. 代码从Apple拉过来放在路径`/third_party/WebKit`下. Webkit主要是由代表核心排版功能的"WebCore"和运行JavaScript的"JavaScriptCore"组成. 我们只用JavaScriptCore来跑测试, 通常使用性能更好的V8 JavaScrip引擎来代替它. 我们实际上并不使用苹果成为"WebKit"的那一层, 那个是WebCore和诸如Safari的OS X应用的嵌入式API. 为了方便我们一般把苹果的代码称作"WebKit". 
+我们用[Webkit](http://webkit.org/)开源工程来排版网页. 代码从Apple拉过来放在路径`/third_party/WebKit`下. Webkit主要是由代表核心排版功能的"WebCore"和运行JavaScript的"JavaScriptCore"组成. 我们只用JavaScriptCore来跑测试, 通常使用性能更好的V8 JavaScrip引擎来代替它. 我们实际上并不使用苹果成为"WebKit"的那一层, 那个是WebCore和诸如Safari的OS X应用的嵌入式API. 为了方便我们一般把苹果的代码称作"WebKit". 
 
 ### The WebKit port
 
 在最底层我们有我们的WebKit "port". 这是需要的特定平台和平台独立的WebCore代码交互的功能的实现. 文件在WebKit tree中, 通常在`chromium`路径或者Chromium后缀的文件. 端口(port)的大部分不限定OS: 可以把它想成WebCore的"Chromium端口". 有些部分例如字体渲染必需根据平台分别处理. 
 
-* 网络通信是由multi-process resource loading<http://www.chromium.org/developers/design-documents/multi-process-resource-loading>系统处理的, 而不是从渲染进程直接移交操作系统. 
+* 网络通信是由[multi-process resource loading](http://www.chromium.org/developers/design-documents/multi-process-resource-loading)系统处理的, 而不是从渲染进程直接移交操作系统. 
 
 * 图片使用Android开发的Skia图片库. 这个跨平台的图片库处理所有图片和图片权限, 除了文字. Skia放在`/third_party/skia`下. 图片操作的切入点是`/webkit/port/platform/graphics/GraphicsContextSkia.cpp`. 它会用到同路径下和`/base/gfx`下的其他文件.
 
@@ -55,7 +55,7 @@ Chromium的渲染进程使用黏合接口嵌入在WebKit端口中. 代码不多:
 
 ### 渲染器的线程
 
-一个渲染器有两个线程(见multi-process architecture<http://www.chromium.org/developers/design-documents/multi-process-architecture>的流程图, 或者见threading in Chromium<http://www.chromium.org/developers/design-documents/threading>怎样编程). 主要对象像`RenderView`和所有的WebKit 代码会跑在渲染线程中. 在所有其他事情之中这允许我们同步地从渲染器向浏览器发送消息. 少数几个操作要求来自浏览器的结果要继续进行. 一个例子是JavaScript要求的时候获取页面cookie. 渲染器线程会阻塞, 主线程排队处理所有的消息直到找到正确的回应. 这期间受到的所有消息会按顺序放在渲染器线程的后面. 
+一个渲染器有两个线程(见[multi-process architecture](http://www.chromium.org/developers/design-documents/multi-process-architecture)的流程图, 或者见[threading in Chromium](http://www.chromium.org/developers/design-documents/threading)怎样编程). 主要对象像`RenderView`和所有的WebKit 代码会跑在渲染线程中. 在所有其他事情之中这允许我们同步地从渲染器向浏览器发送消息. 少数几个操作要求来自浏览器的结果要继续进行. 一个例子是JavaScript要求的时候获取页面cookie. 渲染器线程会阻塞, 主线程排队处理所有的消息直到找到正确的回应. 这期间受到的所有消息会按顺序放在渲染器线程的后面. 
 
 ## 浏览器进程
 
@@ -85,7 +85,7 @@ UI线程的`RenderProcessHost`负责分配每个view的信息到合适的`Render
 
 设置鼠标是从渲染器发送到浏览器的典型消息的一个例子. 在渲染器中, 发生了这些事情. 
 
-* Set cursor消息由WebKit内部生成, 通常是用来相应输入事件. Set cursor消息始于`RenderWidget::SetCursor in content/renderer/render_widget.cc`. 
+* Set cursor 消息由WebKit内部生成, 通常是用来相应输入事件. Set cursor消息始于`RenderWidget::SetCursor in content/renderer/render_widget.cc`. 
 
 * (Set Cursor消息)会调用`RenderWidget::Send`来分配消息. `RenderView`也用这个方法来向浏览器发送消息, 它会调用`RenderThread::Send`. 
 
