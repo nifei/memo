@@ -3,6 +3,8 @@ http://www.chromium.org/developers/design-documents/multi-process-architecture
 
 这个文档讲了Chrominum的高级架构.
 
+(小结: 每个渲染器一个进程, 有时候一个渲染器对应多个页面, 有时候对应一个, 多进程好呀, 多进程安全又优化, 然后看下那个图. )
+
 ## 问题(这段不用看)
 
 完美的渲染引擎很难做, 崩溃, 冻结, 不安全. 
@@ -15,7 +17,7 @@ http://www.chromium.org/developers/design-documents/multi-process-architecture
 
 我们在渲染引擎中对每个浏览器页面使用独立的进程来避免应用被小错误破坏. 渲染引擎进程之间不允许互相访问, 渲染引擎进程也不能访问操作系统. 某种程度上这个给浏览器带来了操作系统级别的内存保护和访问控制. 
 
-运行UI和惯例页面和plugin的主进程叫做"浏览器进程"或者"浏览器"(browser process & browser). 页面的进程叫做"渲染进程"或者"渲染器"(render process & rnderer). 渲染器使用Webkit<http://webkit.org/>开源布局引擎阿狸渲染和布局HTML. 
+运行UI和惯例页面和plugin的主进程叫做"浏览器进程"或者"浏览器"(browser process & browser). 页面的进程叫做"渲染进程"或者"渲染器"(render process & rnderer). 渲染器使用Webkit<http://webkit.org/>开源布局引擎来渲染和排版HTML. 
 
 ![alt text](http://www.chromium.org/_/rsrc/1220197832277/developers/design-documents/multi-process-architecture/arch.png "到底是进程啊还是线程啊还有为什么有的Render有一个view有的有两个啊")
 架构图
@@ -67,6 +69,3 @@ http://www.chromium.org/developers/design-documents/multi-process-architecture
 ## plug-ins
 
 Firefox风格的NPAPI plug-in在各自的进程中运行, 和渲染器分开. 详见Plugin-Architecute<http://www.chromium.org/developers/design-documents/plugin-architecture>
-
-![alt text](link "title")
-title
