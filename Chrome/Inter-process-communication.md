@@ -147,8 +147,3 @@ renderer实现`ResourceLoaderBridge`使用单例(render process)`ResourceDispatc
 `CookieMonster`处理. cookie是全局的. 
 
 页面可以请求文档cookie. renderer会发同步请求给browser, webkit进程被挂起, 直到返回结果. 
-
-[name](link "")
-
-![alt text](link "title")
-title
