@@ -124,8 +124,3 @@ UI线程的`RenderProcessHost`负责分配每个view的信息到合适的`Render
 * `RenderView::OnMessageReceived`拿到消息. 很多种消息在此直接处理. click消息不是, 它会(和其他未被处理的消息一起)发送到`RenderWidget::OnMessageReceived`, 后者按顺序发送到`RenderWidget::OnHandelInputEvent`. 
 
 * 输入事件被发送到`WebWidgetImpl::HandleInputEvent`, `WebWidgetImpl::HandleInputEvent`把它转换成一个WebKit`PlatformMouseEvent`类型然后发送给WebKit离得`WebCore::Widget`类. 
-
-[name](link "")
-
-![alt text](link "title")
-title
