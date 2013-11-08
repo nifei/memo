@@ -32,7 +32,7 @@ Render/Plugin交流通道的两端分别用`PluginChannel`和`PluginChannelHost`
 
 ## Windowless Plugins
 
-无窗口插件是用来直接在渲染管道中运行的. WebKit想要通过插件在屏幕上绘制一个区域的时候会调用插件代码传入绘制上下文. 无窗口插件常用于想要插件在页面上透明的时候 -- 插件的绘制代码会决定页面最终怎样绘制(不是很懂:   Windowless plugins are often used in situations where the plugin is expected to be transparent over the page -- it's up to the plugin drawing code to decide how it munges the bit of the page it's given.)
+无窗口插件是用来直接在渲染管道中运行的. WebKit想要通过插件在屏幕上绘制一个区域的时候会调用插件代码传入绘制上下文.  插件在页面上的绘制会有透明的时候常使用无窗口插件, 插件的绘制和页面本来的像素会融合在一起. 
 
 在进程之外使用无窗口插件的时候, 你仍然需要把插件的渲染(同步地)整合到WebKit的渲染通道中. 一个本来很慢的方法是, 把插件要绘制的区域剪裁下来, 同步地传递给插件进程取绘制. 通过共享内存可以加速这个方法. 
 
@@ -59,9 +59,6 @@ Render/Plugin交流通道的两端分别用`PluginChannel`和`PluginChannelHost`
 
 ![alt text](http://www.chromium.org/_/rsrc/1220197834023/developers/design-documents/plugin-architecture/pluginsoutofprocess.png "")
 
+译注: 官方文档其实写的很简单.. 我觉得这个讲的更清楚: http://blog.csdn.net/milado_nju/article/details/7216136
 
- 
-[name](link "")
-
-![alt text](link "title")
-title
+NPAPI一方的实现也有讲. 
