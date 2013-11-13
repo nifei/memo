@@ -8,7 +8,7 @@ W3C [Navigation Timing specification](http://www.w3.org/TR/navigation-timing/)�
 
 给定一个网络资源的URL, 浏览器首先会检查它本地和应用的缓存. 如果你之前获取过这个资源并提供了合适的缓存头([appropriate cache headers](http://www.aosabook.org/https://developers.google.com/speed/docs/best-practices/caching), `Expires`, `Cache-Control`, etc.), 就可能可以使用本地缓存来填充请求 ---- 最快的请求就是不做请求. 不然的话, 要是我们必须重新验证资源, 或者它过期了, 或者没有见过它, 那就必须来一次昂贵的网络请求了. 
 
-有了hostname和资源路径, Chrome首先会在它可以重用的连接中查找 -- 以`{scheme, host,port}`存储的套接字们. 也可以这样, 如果你配置了代理, 或者指定了[proxy auto-config](http://www.aosabook.org/http://en.wikipedia.org/wiki/Proxy_auto-config)(PAG)脚本, chrome就会通过适当的代理查找连接. PAC脚本允许根据URL或其他指定的规则使用不同的代理, 每种都可以它们自己的套接字池. 最后要是上面的条件都不符合, 就只能以解析主机名到IP地址来开始这个请求了 -- 也就是要先做DNS查找. 
+有了hostname和资源路径, Chrome首先会在它可以重用的连接中查找 -- 以`{scheme, host,port}`存储的套接字们. 也可以这样, 如果你配置了代理, 或者指定了[proxy auto-config](http://www.aosabook.org/http://en.wikipedia.org/wiki/Proxy_auto-config)(PAC)脚本, chrome就会通过适当的代理查找连接. PAC脚本允许根据URL或其他指定的规则使用不同的代理, 每种都可以它们自己的套接字池. 最后要是上面的条件都不符合, 就只能以解析主机名到IP地址来开始这个请求了 -- 也就是要先做DNS查找. 
 
 运气好的话, 主机名已经在缓存中, 也就是说系统查找一下就可以返回. 否则的话, 在发出DNS查询之前什么都做不了. DNS查询的时间和你的网络供应商, 网站知名度, 域名和中间节点相似度, 以及被这个域名授权的服务器的反应速度都有关系. 也就是说变数很大, 花上几百毫秒也不奇怪. 
 
