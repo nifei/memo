@@ -153,6 +153,12 @@ ResourceDispatcherHostImpl::BeginRequest (貌似, 同步异步都会用这个)
 				
 				//注[3]
 				但是看下面一段
+				SSL
+				SSL socket需要进行SSL 连接配置和认证验证. 现在在所有平台下我们都在用NSS的libssl库处理ssl连接逻辑. 但是认证验证用的是平台相关的API. 我们正在朝着使用认证验证缓存的方向努力, 这样就可以把同一个认证的多次验证整合成一个认证验证任务, 在缓存里放一会儿. 
+				
+				`SSLClientSocketNSS`大致地做这些事情(忽略几个高级特性)
+				* Connect()调用. 我们在`SSLConfig`确立的配置或预编译宏的基础上设置NSS的SSL选项. 然后启动握手. 
+				* 握手结束了. 假设没有遇到错误, 继续使用`CertVerifier`验证服务器的认证. 认证验证会花一阵子, `CertVerifier`使用`WorkerPool`来真正调用`X509Certificate::Verify()`, 平台相关API会有具体实现. 
 				
 				
 				STATE_INIT_CONNECTION_COMPLETE
