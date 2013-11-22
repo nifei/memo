@@ -106,7 +106,7 @@ Chrome的network stack实现的一个主要问题是多平台的移植: Linux, W
 |net/proxy	|Proxy (SOCKS and HTTP) configuration, resolution, script fetching, etc.
 |net/socket	|Cross-platform implementations of TCP sockets, SSL streams, and socket pools
 |net/spdy	|SPDY protocol implementation
-|net/url_request	|URLRequest, URLRequestContext, and URLRequestJob implementations
+| **net/url_request**	|URLRequest, URLRequestContext, and URLRequestJob implementations
 |net/websockets	|WebSockets protocol implementation
 
 代码写的很好, 慢慢读. 测试用例也很多. 

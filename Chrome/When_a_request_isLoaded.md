@@ -77,7 +77,12 @@ ResourceDispatcherHostImpl::BeginRequest (貌似, 同步异步都会用这个)
 		没有的话就从net::URLRequestContext里搞一个出来
 		把这个request一顿捯饬
 		scheme判断一下什么的.
-		设置给ResourceHandler (ResourceLoader使用SyncResourceHandle和AsyncResourceHandle来向Renderer进程发送状态消息，并接受Renderer进程对这些消息的反馈。)
+		设置给ResourceHandler (ResourceLoader使用SyncResourceHandle和AsyncResourceHandle来向Renderer进程发送状态消息，并接受Renderer进程对这些消息的反馈。
+		// The resource dispatcher host uses this interface to process network events
+		// for an URLRequest instance.  A ResourceHandler's lifetime is bound to its
+		// associated URLRequest.
+		Resource Dispatcher Host 使用这个接口(ResourceLoader)处理URLRequest实例的网络事件
+		)
 		content::ResourceDispatcherHostDelegate *delegate_->RequestBeginning (没做什么?)
 		
 		就是前面那个deferred_loader ResourceLoader::CompleteTransfer 
