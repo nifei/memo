@@ -84,6 +84,7 @@ CefContentBrowserClient会在适当的时候通过CefBrowserContext::CreateReque
 	
 	所以在另一张流程图"URLRequest的cookie store和protocol handler"里我们重点看一下这几个东西的使用. 这也是我们定制scheme, 处理cookie的切入点. 
 
+URLRequestJobManager::RegisterProtocolFactory
 
 
 
@@ -91,4 +92,17 @@ CefContentBrowserClient会在适当的时候通过CefBrowserContext::CreateReque
 
 
 
+URLRequestContext创建URLRequest
 
+URLRequest依赖URLRequestContext
+
+URLRequestJob/HttpRequestJob使用URLRequestContext
+
+URLRequestContext(Storage)持有
+job_factory
+network_delegate
+cookie_store (CookieMonster)
+
+job_factory持有protocol_handler
+
+ResourceLoader持有URLRequestContext
